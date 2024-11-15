@@ -1,0 +1,10 @@
+[package]
+name = "gf1200-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[profile.release]
+lto = true
+strip = "symbols"
