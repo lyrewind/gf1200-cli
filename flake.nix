@@ -24,14 +24,10 @@
           };
         in {
           devShells.default = pkgs.mkShell {
-            packages = with pkgs; [
-              toolchain
-              just
-              bacon
-              nil
-              nixfmt-classic
-              taplo
-            ];
+            packages = let
+              devTools = with pkgs; [ just bacon nil nixfmt-classic taplo ];
+              buildDeps = with pkgs; [ pkg-config openssl ];
+            in [ toolchain ] ++ devTools ++ buildDeps;
           };
           packages.default = naersk-lib.buildPackage { src = ./.; };
         };
