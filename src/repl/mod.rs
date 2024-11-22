@@ -4,24 +4,39 @@ use crate::{state::AppState, utils::ui::SafePrompt};
 
 pub mod commands;
 
-const PROMPT_SYMBOL: &str = "[>]";
-const LOG_SYMBOL: &str = "[:]";
-
-pub struct REPL<'a> {
-    state: AppState<'a>,
+pub struct REPL<'s> {
+    state: AppState<'s>,
 }
 
 impl<'s> REPL<'s> {
-    pub fn new(state: AppState<'s>) -> Self {
+    pub const fn new(state: AppState<'s>) -> Self {
         Self { state }
     }
     pub fn start(&self) {
         loop {
             let line = Text::new("[>] ").safely_prompt();
+
             if &line == "exit" {
                 break;
             }
-            println!("{line}");
+
+            let mut chunks = line.split_whitespace();
+            let Some(command) = chunks.next() else {
+                println!("missing command.");
+                continue;
+            };
+            let args: Vec<&str> = chunks.collect();
+
+            let Some(command) = commands::find_command(command) else {
+                println!("unknown command '{command}'.");
+                continue;
+            };
+
+            if let Err(err) = command.validate_args(&args) {
+                eprintln!("failed to run '{}'\n\\====> {err}", command.name);
+            } else {
+                (command.run)(&self.state, &args);
+            }
         }
     }
 }

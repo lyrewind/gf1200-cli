@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
-use reqwest::blocking as rq;
-use responses::SessionResponse;
+use reqwest::blocking::{self as rq, RequestBuilder, Response};
+use responses::{ConnectedDevice, SessionResponse};
 use secrecy::{ExposeSecret, SecretString};
+use serde::de::DeserializeOwned;
 
 pub mod responses;
 
@@ -15,7 +16,7 @@ impl ApiState for Unauthenticated {}
 impl ApiState for Authenticated {}
 pub struct Api<'a, State: ApiState> {
     url: &'a str,
-    client: rq::Client,
+    pub client: rq::Client,
     state: State,
 }
 impl<State: ApiState> Api<'_, State> {
@@ -71,4 +72,40 @@ impl<'a> Api<'a, Authenticated> {
     pub fn token(&self) -> String {
         self.state.token.expose_secret().to_string()
     }
+    pub fn get<'b>(&self, route: &'b str) -> RequestBuilder {
+        self.client
+            .get(self.with_route(route))
+            .header("authorization", format!("Bearer {}", self.token()))
+    }
+    pub fn post<'b>(&self, route: &'b str) -> RequestBuilder {
+        self.client.post(self.with_route(route))
+    }
+    pub fn connected_devices(&self) -> Option<Vec<ConnectedDevice>> {
+        self.get("/connected_device").send().map_or_else(
+            |e| {
+                eprintln!("failed to GET /connected_device: {e:?}");
+                None
+            },
+            parse_json_response,
+        )
+    }
+    pub fn device(&self, mac_address: &str) -> Option<ConnectedDevice> {
+        self.get(&format!("/connected_device/{mac_address}"))
+            .send()
+            .map_or_else(
+                |e| {
+                    eprintln!("failed to GET /connected_device: {e:?}");
+                    None
+                },
+                parse_json_response,
+            )
+    }
+}
+
+/// Tries to parse a `response`'s body to JSON.
+fn parse_json_response<T: DeserializeOwned>(response: Response) -> Option<T> {
+    response
+        .json::<T>()
+        .inspect_err(|_| eprintln!("failed to parse response."))
+        .ok()
 }
