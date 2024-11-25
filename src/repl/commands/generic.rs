@@ -45,7 +45,7 @@ pub fn device() -> Command {
                 unreachable!()
             };
 
-            match state.api.device(mac) {
+            match state.api.connected_device(mac) {
                 Some(dev) => println!("{dev}"),
                 None => {
                     println!("no device with mac address '{mac}' found.")

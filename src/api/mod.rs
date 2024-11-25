@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
 use reqwest::blocking::{self as rq, RequestBuilder, Response};
-use responses::{ConnectedDevice, SessionResponse};
+use responses::SessionResponse;
 use secrecy::{ExposeSecret, SecretString};
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Deserialize};
 
 pub mod responses;
 
@@ -89,7 +89,7 @@ impl<'a> Api<'a, Authenticated> {
             parse_json_response,
         )
     }
-    pub fn device(&self, mac_address: &str) -> Option<ConnectedDevice> {
+    pub fn connected_device(&self, mac_address: &str) -> Option<ConnectedDevice> {
         self.get(&format!("/connected_device/{mac_address}"))
             .send()
             .map_or_else(
@@ -99,6 +99,112 @@ impl<'a> Api<'a, Authenticated> {
                 },
                 parse_json_response,
             )
+    }
+    pub fn restart(&self) -> Result<(), ()> {
+        todo!()
+    }
+    pub fn update_admin_login(&self, username: &str, password: &str) -> Result<(), ()> {
+        todo!()
+    }
+    pub fn set_remote_access(&self, on: bool) -> Result<(), ()> {
+        todo!()
+    }
+    pub fn set_remote_ping(&self, on: bool) -> Result<(), ()> {
+        todo!()
+    }
+    pub fn wan_status() -> Option<WanStatus> {
+        todo!()
+    }
+    pub fn lan_status() -> Option<LanStatus> {
+        todo!()
+    }
+    pub fn device() -> Option<Device> {
+        todo!()
+    }
+}
+
+pub struct DnsStatus {
+    pub auto: bool,
+    pub dns1: String,
+    pub dns2: String,
+    pub dns3: String
+}
+
+pub struct WanStatus {
+    pub id: String,
+    pub mode: WanMode,
+    pub gateway_v4: String, // IpAddr?
+    pub gateway_v6: String,
+    pub dns_v4: DnsStatus,
+    pub dns_v6: DnsStatus
+}
+
+pub enum WanMode {
+    PPPoE,
+    DHCP,
+    Static
+}
+
+pub struct InvalidWanMode;
+
+impl TryFrom<usize> for WanMode {
+    type Error = InvalidWanMode;
+
+    fn try_from(value: usize) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::DHCP),
+            1 => Ok(Self::Static),
+            2 => Ok(Self::PPPoE),
+            _ => Err(InvalidWanMode)
+        }
+    }
+}
+
+pub struct LanStatus {
+    pub id: String,
+    pub ip4: String,
+    pub ip6_count: usize,
+    pub ip6_list: Vec<String>,
+    pub mac: String,
+    pub mtu: usize,
+    pub netmask: String
+}
+
+pub struct Device {
+    pub id: String,
+    pub model: String,
+    pub uptime: usize,
+    pub fw_version: String
+}
+
+#[derive(Deserialize)]
+pub struct ConnectedDevice {
+    pub hostname: String,
+    pub id: String,
+    pub ip: String,
+    pub mac: String,
+}
+
+impl Display for ConnectedDevice {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let text = format!(
+            "<===
+            <hostname> {}
+            [id] {}
+            [ip] {}
+            [mac] {}
+            ===>",
+            (if self.hostname.is_empty() {
+                "UNKNOWN"
+            } else {
+                &self.hostname
+            }),
+            self.id,
+            self.ip,
+            self.mac
+        );
+
+        write!(f, "{text}")
     }
 }
 
