@@ -54,3 +54,21 @@ pub fn device() -> Command {
         },
     }
 }
+
+pub fn restart() -> Command {
+    Command {
+        name: "restart",
+        description: "Restarts the device.",
+        args: None,
+        run: |state, _| match state.api.restart() {
+            Ok(_) => {
+                println!("restarting device...");
+                std::process::exit(0)
+            }
+            Err(_) => {
+                // TODO: token refreshing.
+                println!("failed to restart device.");
+            }
+        },
+    }
+}

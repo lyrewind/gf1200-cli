@@ -80,6 +80,11 @@ impl<'a> Api<'a, Authenticated> {
     pub fn post<'b>(&self, route: &'b str) -> RequestBuilder {
         self.client.post(self.with_route(route))
     }
+    pub fn put<'b>(&self, route: &'b str) -> RequestBuilder {
+        self.client
+            .put(self.with_route(route))
+            .header("authorization", format!("Bearer {}", self.token()))
+    }
     pub fn connected_devices(&self) -> Option<Vec<ConnectedDevice>> {
         self.get("/connected_device").send().map_or_else(
             |e| {
@@ -101,7 +106,9 @@ impl<'a> Api<'a, Authenticated> {
             )
     }
     pub fn restart(&self) -> Result<(), ()> {
-        todo!()
+        self.put("/action/1")
+            .send()
+            .map_or_else(|_| Err(()), |_| Ok(()))
     }
     pub fn update_admin_login(&self, username: &str, password: &str) -> Result<(), ()> {
         todo!()
@@ -127,7 +134,7 @@ pub struct DnsStatus {
     pub auto: bool,
     pub dns1: String,
     pub dns2: String,
-    pub dns3: String
+    pub dns3: String,
 }
 
 pub struct WanStatus {
@@ -136,13 +143,13 @@ pub struct WanStatus {
     pub gateway_v4: String, // IpAddr?
     pub gateway_v6: String,
     pub dns_v4: DnsStatus,
-    pub dns_v6: DnsStatus
+    pub dns_v6: DnsStatus,
 }
 
 pub enum WanMode {
     PPPoE,
     DHCP,
-    Static
+    Static,
 }
 
 pub struct InvalidWanMode;
@@ -155,7 +162,7 @@ impl TryFrom<usize> for WanMode {
             0 => Ok(Self::DHCP),
             1 => Ok(Self::Static),
             2 => Ok(Self::PPPoE),
-            _ => Err(InvalidWanMode)
+            _ => Err(InvalidWanMode),
         }
     }
 }
@@ -167,14 +174,14 @@ pub struct LanStatus {
     pub ip6_list: Vec<String>,
     pub mac: String,
     pub mtu: usize,
-    pub netmask: String
+    pub netmask: String,
 }
 
 pub struct Device {
     pub id: String,
     pub model: String,
     pub uptime: usize,
-    pub fw_version: String
+    pub fw_version: String,
 }
 
 #[derive(Deserialize)]

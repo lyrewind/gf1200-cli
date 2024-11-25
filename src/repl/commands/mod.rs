@@ -1,5 +1,7 @@
 use std::{
-    fmt::{Debug, Display}, net::{Ipv4Addr, Ipv6Addr}, str::FromStr
+    fmt::{Debug, Display},
+    net::{Ipv4Addr, Ipv6Addr},
+    str::FromStr,
 };
 
 use thiserror::Error;
@@ -13,7 +15,7 @@ pub mod generic;
 pub fn list_commands() -> Vec<Command> {
     use generic::*;
 
-    Vec::from([devices(), device()])
+    Vec::from([devices(), device(), restart()])
 }
 
 #[derive(Clone)]
