@@ -122,8 +122,10 @@ impl<'a> Api<'a, Authenticated> {
     pub fn wan_status() -> Option<WanStatus> {
         todo!()
     }
-    pub fn lan_status() -> Option<LanStatus> {
-        todo!()
+    pub fn lan_status(&self) -> Option<LanStatus> {
+        self.get("/interface/br0")
+            .send()
+            .map_or_else(|_| None, parse_json_response)
     }
     pub fn device() -> Option<Device> {
         todo!()
@@ -167,6 +169,7 @@ impl TryFrom<usize> for WanMode {
     }
 }
 
+#[derive(Deserialize)]
 pub struct LanStatus {
     pub id: String,
     pub ip4: String,
@@ -177,6 +180,7 @@ pub struct LanStatus {
     pub netmask: String,
 }
 
+#[derive(Deserialize)]
 pub struct Device {
     pub id: String,
     pub model: String,

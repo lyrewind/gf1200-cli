@@ -9,13 +9,15 @@ use thiserror::Error;
 use crate::state::AppState;
 
 pub mod generic;
+pub mod lan;
 
 #[allow(clippy::wildcard_imports)]
 /// Gets a list of all registered commands.
 pub fn list_commands() -> Vec<Command> {
     use generic::*;
+    use lan;
 
-    Vec::from([devices(), device(), restart()])
+    Vec::from([devices(), device(), restart(), lan::status()])
 }
 
 #[derive(Clone)]
