@@ -91,13 +91,13 @@ impl Display for Command {
 
 #[derive(Error, Debug)]
 pub enum ArgValidationError {
-    #[error("this command takes no argument.")]
+    #[error("esse comando não leva nenhum argumento.")]
     CommandTakesNoArgs,
-    #[error("this command takes {0} fewer arguments than provided.")]
+    #[error("esse comando leva {0} argumentos a menos.")]
     ExtraArgs(usize),
-    #[error("missing arguments: {0:?}")]
+    #[error("argumentos necessários: {0:?}")]
     Missing(Vec<Arg>),
-    #[error("expected argument: {arg}, found {found}.")]
+    #[error("esperado argumento: {arg}, mas foi recebido {found}.")]
     WrongType { arg: Arg, found: ArgType },
 }
 
@@ -123,9 +123,9 @@ pub enum ArgType {
 impl Debug for ArgType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text = match self {
-            Self::String => "any string.",
-            Self::Bool => "one of: '0', '1', 'true' or 'false'.",
-            Self::IpAddress => "a valid IPv4 or IPv6 address.",
+            Self::String => "qualquer string",
+            Self::Bool => "um de: '0', '1', 'true' ou 'false'",
+            Self::IpAddress => "um endereço IPv4 ou IPv6 válido",
         };
 
         write!(f, "{text}")
@@ -137,7 +137,7 @@ impl Display for ArgType {
         let text = match self {
             Self::String => "string",
             Self::Bool => "boolean",
-            Self::IpAddress => "IPv4/6 address",
+            Self::IpAddress => "endereço IPv4/6",
         };
 
         write!(f, "{text}")

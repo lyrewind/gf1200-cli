@@ -22,18 +22,17 @@ impl<'s> REPL<'s> {
 
             let mut chunks = line.split_whitespace();
             let Some(command) = chunks.next() else {
-                println!("missing command.");
                 continue;
             };
             let args: Vec<&str> = chunks.collect();
 
             let Some(command) = commands::find_command(command) else {
-                println!("unknown command '{command}'.");
+                println!("comando desconhecido: '{command}'.");
                 continue;
             };
 
             if let Err(err) = command.validate_args(&args) {
-                eprintln!("failed to run '{}'\n\\====> {err}", command.name);
+                eprintln!("falha ao executar '{}'\n\\====> {err}", command.name);
             } else {
                 (command.run)(&self.state, &args);
             }

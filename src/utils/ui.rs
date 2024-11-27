@@ -7,10 +7,10 @@ pub trait SafePrompt {
 /// Exits on <C-c> or <esc>.
 const HANDLE_PROMPT_ERROR: fn(InquireError) -> String = |e| match e {
     InquireError::OperationInterrupted | InquireError::OperationCanceled => {
-        println!("exiting...");
+        println!("saindo...");
         std::process::exit(0);
     }
-    _ => panic!("unexpected error prompting text."),
+    _ => panic!("falha ao exibir texto."),
 };
 
 impl SafePrompt for Text<'_> {

@@ -7,16 +7,16 @@ fn main() {
     let commands = repl::commands::list_commands();
     let state = AppState { api, commands };
 
-    println!("[#] logged in as '{username}'");
+    println!("[#] entrando como '{username}'");
     REPL::new(state).start();
 }
 
 fn prompt_login() -> (String, String) {
-    let username = Text::new("<username> ").safely_prompt();
-    let password = Password::new("<password> ")
+    let username = Text::new("<usuário> ").safely_prompt();
+    let password = Password::new("<senha> ")
         .with_display_toggle_enabled()
         .with_display_mode(PasswordDisplayMode::Masked)
-        .with_help_message("Ctrl+R to show/hide password.")
+        .with_help_message("Ctrl+R pra exibir ou esconder.")
         .without_confirmation()
         .safely_prompt();
     (username, password)

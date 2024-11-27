@@ -3,7 +3,7 @@ use super::Command;
 pub fn status() -> Command {
     Command {
         name: "lan-status",
-        description: "Lista o status da rede local (LAN).",
+        description: "lista o status da rede local (LAN).",
         args: None,
         run: |state, _| match state.api.lan_status() {
             Some(status) => {

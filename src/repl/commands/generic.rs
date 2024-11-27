@@ -3,22 +3,22 @@ use super::{Arg, ArgType, Command};
 pub fn devices() -> Command {
     Command {
         name: "devices",
-        description: "Lists connected devices.",
+        description: "lista dispositivos conectados.",
         args: None,
         run: |state, _| match state.api.connected_devices() {
             Some(devices) => {
                 if devices.is_empty() {
-                    println!("[#] found no device connected.");
+                    println!("[#] nenhum dispositivo conectado.");
                     return;
                 }
 
                 println!(
-                    "[#] found {} {} connected:",
+                    "[#] {} {} encontrados:",
                     devices.len(),
                     if devices.len() > 1 {
-                        "devices"
+                        "dispositivos"
                     } else {
-                        "device"
+                        "dispositivo"
                     }
                 );
                 for dev in devices {
@@ -26,7 +26,7 @@ pub fn devices() -> Command {
                 }
             }
             None => {
-                println!("failed to fetch connected devices.");
+                println!("falha ao ler dispositivos.");
             }
         },
     }
@@ -35,7 +35,7 @@ pub fn devices() -> Command {
 pub fn device() -> Command {
     Command {
         name: "device",
-        description: "Lists device information.",
+        description: "lista informações de um dispositivo",
         args: Some(Vec::from([Arg {
             name: "mac",
             typing: ArgType::String,
@@ -48,7 +48,7 @@ pub fn device() -> Command {
             match state.api.connected_device(mac) {
                 Some(dev) => println!("{dev}"),
                 None => {
-                    println!("no device with mac address '{mac}' found.")
+                    println!("nenhum dispositivo com endereço '{mac}' encontrado.")
                 }
             }
         },
@@ -58,16 +58,16 @@ pub fn device() -> Command {
 pub fn restart() -> Command {
     Command {
         name: "restart",
-        description: "Restarts the device.",
+        description: "reinicia o dispositivo.",
         args: None,
         run: |state, _| match state.api.restart() {
             Ok(_) => {
-                println!("restarting device...");
+                println!("reiniciando...");
                 std::process::exit(0)
             }
             Err(_) => {
                 // TODO: token refreshing.
-                println!("failed to restart device.");
+                println!("falha ao reiniciar dispositivo.");
             }
         },
     }
