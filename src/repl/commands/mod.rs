@@ -10,14 +10,16 @@ use crate::state::AppState;
 
 pub mod generic;
 pub mod lan;
+pub mod repl;
 
 #[allow(clippy::wildcard_imports)]
 /// Gets a list of all registered commands.
 pub fn list_commands() -> Vec<Command> {
     use generic::*;
     use lan;
+    use repl;
 
-    Vec::from([devices(), device(), restart(), lan::status()])
+    Vec::from([devices(), device(), restart(), lan::status(), repl::help()])
 }
 
 #[derive(Clone)]
@@ -66,6 +68,27 @@ impl Command {
     }
 }
 
+impl Display for Command {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let arg_line = match &self.args {
+            Some(args) => args
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+                .join(" "),
+            None => "".to_string(),
+        };
+
+        write!(
+            f,
+            "{}{}{arg_line} - {}",
+            self.name,
+            if !arg_line.is_empty() { " " } else { &arg_line },
+            self.description
+        )
+    }
+}
+
 #[derive(Error, Debug)]
 pub enum ArgValidationError {
     #[error("this command takes no argument.")]
@@ -86,7 +109,7 @@ pub struct Arg {
 
 impl Display for Arg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "'{}' ({})", self.name, self.typing)
+        write!(f, "<{} ({})>", self.name, self.typing)
     }
 }
 
@@ -97,7 +120,7 @@ pub enum ArgType {
     IpAddress,
 }
 
-impl Display for ArgType {
+impl Debug for ArgType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text = match self {
             Self::String => "any string.",
@@ -109,12 +132,12 @@ impl Display for ArgType {
     }
 }
 
-impl Debug for ArgType {
+impl Display for ArgType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text = match self {
             Self::String => "string",
             Self::Bool => "boolean",
-            Self::IpAddress => "IPv4 or IPv6 address",
+            Self::IpAddress => "IPv4/6 address",
         };
 
         write!(f, "{text}")

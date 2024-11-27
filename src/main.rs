@@ -1,10 +1,11 @@
-use gf1200_cli::{api::Api, repl::REPL, state::AppState, utils::ui::SafePrompt};
+use gf1200_cli::{api::Api, repl::{self, REPL}, state::AppState, utils::ui::SafePrompt};
 use inquire::{Password, PasswordDisplayMode, Text};
 
 fn main() {
     let (username, password) = prompt_login();
     let api = Api::new().authenticate(&username, &password);
-    let state = AppState { api };
+    let commands = repl::commands::list_commands();
+    let state = AppState { api, commands };
 
     println!("[#] logged in as '{username}'");
     REPL::new(state).start();
